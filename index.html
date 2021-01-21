@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .box1 {
+            width: 600px;
+            height: 100px;
+            margin: 10px auto;
+            border: 5px solid blueviolet;
+            position: relative;
+        }
+
+        #boxChild {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="btn1">添加</button>
+    <div class="box1"></div>
+    <script>
+        var oBtn1 = document.querySelector('.btn1')
+        var oDiv1 = document.querySelector('.box1')
+        var oBoxArray = []
+        var a = 2
+        var onEl1 = ''
+        var onLeft
+        var oIndex
+        oBtn1.addEventListener('click', function () {
+            if(oBoxArray.length === 6){
+                window.alert('装不下了......')
+                return 
+            }
+            oBoxArray.push({
+                className: `box${a++}`,
+            })
+            var onElem = document.createElement('div')
+            onElem.className = oBoxArray[oBoxArray.length - 1].className
+            onElem.id = 'boxChild'
+            onElem.style.background = RandomColor()
+            onElem.style.left = ((oBoxArray.length - 1)*100) + 'px'
+            oDiv1.appendChild(onElem)
+        })
+
+        document.addEventListener('mousedown', function (e) {
+            e.stopPropagation()
+            oBoxArray.forEach((value, index) => {
+                if (e.target.className === value.className) {
+                    oIndex = index
+                    var onEl = value.className
+                    onEl1 = document.querySelector('.' + onEl)
+                    onLeft = parseInt(window.getComputedStyle(onEl1).left)
+                    onEl1.style.zIndex = 1
+                    document.addEventListener('mousemove', mOve)
+                }
+            })
+        })
+        document.addEventListener('mouseup', function (e) {
+            e.stopPropagation()
+            oBoxArray.forEach(value => {
+                if (e.target.className === value.className) {
+                    var onEl = value.className
+                    onEl1 = document.querySelector('.' + onEl)
+                }
+                onEl1.style.left = onLeft + 'px';
+                onEl1.style.zIndex = 0
+            })
+            document.removeEventListener('mousemove', mOve)
+        })
+
+        function mOve(e) {
+            var oDiv1W = parseInt(window.getComputedStyle(oDiv1).width)
+            var oDiv2W = parseInt(window.getComputedStyle(onEl1).width)
+            var x = e.pageX - oDiv1.offsetLeft - oDiv1.clientLeft - onEl1.offsetWidth / 2;
+            var y = e.pageY - oDiv1.offsetTop - oDiv1.clientTop - onEl1.offsetHeight / 2;
+            if (x < 0) {
+                x = 0;
+            }
+            if (y < 0) {
+                y = 0;
+            }
+            if (x > oDiv1.clientWidth - onEl1.clientWidth) {
+                x = oDiv1.clientWidth - onEl1.clientWidth;
+            }
+            if (y > oDiv1.clientHeight - onEl1.clientHeight) {
+                y = oDiv1.clientHeight - onEl1.clientHeight;
+            }
+            onEl1.style.left = x + 'px';
+            if (x > onLeft + 50) {
+                if (x > (oBoxArray.length - 1) * 100) {
+                    return
+                }
+                onLeft += 100
+                var e1 = document.querySelector('.' + oBoxArray[++oIndex].className)
+                e1.style.left = (parseInt(window.getComputedStyle(e1).left) - 100) + 'px'
+                swapArr(oBoxArray, oIndex-1, oIndex)
+            }
+            if (x < onLeft - 50) {
+                if (x < 0) {
+                    return
+                }
+                onLeft -= 100
+                var e1 = document.querySelector('.' + oBoxArray[--oIndex].className)
+                e1.style.left = (parseInt(window.getComputedStyle(e1).left) + 100) + 'px'
+                swapArr(oBoxArray, oIndex, oIndex+1)
+            }
+        }
+        function swapArr(arr, index1, index2) {
+            arr[index1] = arr.splice(index2, 1, arr[index1])[0];
+            return arr;
+        }
+        function RandomColor() {
+            var r = parseInt(Math.random()*255)
+            var g = parseInt(Math.random()*255)
+            var b = parseInt(Math.random()*255)
+            return `rgba(${r},${g},${b})`
+        }
+    </script>
+</body>
+
+</html>
